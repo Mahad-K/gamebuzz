@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="description" content="GameBuzz — Jackbox-style gaming trivia party game!" />
+  <title>GameBuzz 🎮</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Patrick+Hand&display=swap" rel="stylesheet" />
+
+  <!-- Wired Elements (sketchy/hand-drawn web components) -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/wired-elements@3.0.0/lib/wired-elements.bundled.js"></script>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: HOME
+       ═══════════════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="logo-block" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <span class="logo-emoji">🎮</span>
+      <h1 class="logo-text">GAMEBUZZ</h1>
+      <p class="logo-sub">The ultimate gaming trivia party game</p>
+    </div>
+
+    <div class="home-buttons">
+      <button class="big-btn btn-host" id="btn-host">🎤 HOST GAME</button>
+      <button class="big-btn btn-join" id="btn-join">🕹️ JOIN GAME</button>
+    </div>
+
+    <p class="text-muted text-center" style="padding: 16px 16px 32px; font-size:0.8rem;">
+      2–10 players &nbsp;•&nbsp; Gaming trivia &nbsp;•&nbsp; No download needed
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: HOST SETUP
+       ═══════════════════════════════════════════ -->
+  <div class="screen form-screen" id="screen-host-setup">
+    <div class="card-wrap">
+      <h2 class="screen-title">🎤 <span>Host</span> a Game</h2>
+
+      <div class="form-group">
+        <label class="form-label" for="host-name">Your Name</label>
+        <input
+          id="host-name"
+          class="text-input"
+          type="text"
+          maxlength="20"
+          placeholder="e.g. GameMaster99"
+          autocomplete="off"
+          autocapitalize="words"
+        />
+      </div>
+
+      <div class="slider-section">
+        <div class="slider-header">
+          <span class="slider-label">Number of Questions</span>
+          <span class="slider-value" id="host-q-count">10</span>
+        </div>
+        <input
+          id="host-q-slider"
+          type="range"
+          min="5" max="30" value="10" step="1"
+        />
+        <div style="display:flex; justify-content:space-between; margin-top:4px;">
+          <span class="text-muted" style="font-size:0.75rem">5</span>
+          <span class="text-muted" style="font-size:0.75rem">30</span>
+        </div>
+      </div>
+
+      <div class="action-btns">
+        <button class="big-btn btn-host" id="btn-create-room">CREATE ROOM →</button>
+        <button class="big-btn btn-secondary" id="btn-host-back">← BACK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: JOIN GAME
+       ═══════════════════════════════════════════ -->
+  <div class="screen form-screen" id="screen-join">
+    <div class="card-wrap">
+      <h2 class="screen-title">🕹️ <span>Join</span> a Game</h2>
+
+      <div class="form-group">
+        <label class="form-label" for="join-code">Room Code</label>
+        <input
+          id="join-code"
+          class="text-input code-input"
+          type="text"
+          maxlength="6"
+          placeholder="123456"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="join-name">Your Name</label>
+        <input
+          id="join-name"
+          class="text-input"
+          type="text"
+          maxlength="20"
+          placeholder="e.g. TriviaNerd"
+          autocomplete="off"
+          autocapitalize="words"
+        />
+      </div>
+
+      <div class="action-btns">
+        <button class="big-btn btn-join" id="btn-join-submit">JOIN GAME →</button>
+        <button class="big-btn btn-secondary" id="btn-join-back">← BACK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: LOBBY (Waiting Room)
+       ═══════════════════════════════════════════ -->
+  <div class="screen" id="screen-lobby">
+
+    <!-- Room code -->
+    <div class="room-code-block">
+      <div class="room-code-label">ROOM CODE</div>
+      <div class="room-code-display" id="lobby-code">------</div>
+      <div class="room-code-hint">Share this code with friends!</div>
+    </div>
+
+    <!-- Players grid -->
+    <div class="players-section">
+      <div class="players-title">PLAYERS</div>
+      <div class="players-grid" id="lobby-players-grid">
+        <!-- Chips injected by ui.js -->
+      </div>
+    </div>
+
+    <!-- ── HOST PANEL ── -->
+    <div class="host-panel hidden" id="host-panel">
+      <div class="host-panel-title">⚙️ HOST CONTROLS</div>
+
+      <div class="slider-section" style="margin-bottom: 16px;">
+        <div class="slider-header">
+          <span class="slider-label">Questions</span>
+          <span class="slider-value" id="lobby-q-count-display">10</span>
+        </div>
+        <input
+          id="lobby-q-slider"
+          type="range"
+          min="5" max="30" value="10" step="1"
+        />
+      </div>
+
+      <button class="big-btn btn-success" id="btn-start-game">▶ START GAME</button>
+      <p class="player-count-req" id="player-count-hint">Waiting for players...</p>
+    </div>
+
+    <!-- ── WAITING MESSAGE (non-hosts) ── -->
+    <div class="waiting-msg hidden" id="waiting-msg">
+      ⏳ Waiting for the host to start the game...
+    </div>
+
+    <!-- ── VOTE SECTION (non-hosts) ── -->
+    <div class="vote-section hidden" id="vote-section">
+      <div class="vote-title">👑 Vote for New Host</div>
+      <p class="vote-hint">If the host is AFK, get a majority vote to transfer control.</p>
+      <div class="vote-players-list" id="vote-players-list">
+        <!-- Vote buttons injected by ui.js -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: QUESTION
+       ═══════════════════════════════════════════ -->
+  <div class="screen" id="screen-question">
+
+    <!-- Header: progress + timer -->
+    <div class="q-header">
+      <span class="q-progress-label" id="q-progress">Q 1 / 10</span>
+
+      <div class="timer-block">
+        <div class="timer-bar-wrap">
+          <div class="timer-bar-fill" id="timer-bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div class="timer-number" id="timer-number">20s</div>
+    </div>
+
+    <!-- Category -->
+    <div class="q-category" id="q-category"></div>
+
+    <!-- Question text -->
+    <div class="question-card">
+      <p class="question-text" id="question-text">Loading question...</p>
+    </div>
+
+    <!-- Answer options (2×2 grid) -->
+    <div class="options-grid" id="options-grid">
+      <!-- Buttons injected by ui.js -->
+    </div>
+
+    <!-- Status -->
+    <div class="answer-status" id="answer-status">Choose your answer!</div>
+    <div class="answered-count" id="answered-count"></div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: REVEAL
+       ═══════════════════════════════════════════ -->
+  <div class="screen" id="screen-reveal">
+
+    <div class="reveal-card">
+      <div class="reveal-label">CORRECT ANSWER</div>
+      <div class="reveal-answer-text" id="reveal-answer-text">—</div>
+
+      <div class="reveal-points" id="reveal-points">+0</div>
+      <div class="reveal-points-label" id="reveal-points-label">pts</div>
+
+      <div class="reveal-first-badge hidden" id="reveal-first-badge">⚡ First Correct!</div>
+    </div>
+
+    <!-- Mini live leaderboard -->
+    <div class="reveal-scores" id="reveal-scores-list">
+      <!-- Rows injected by ui.js -->
+    </div>
+
+    <div class="reveal-next">
+      Next question in <span id="reveal-countdown">4</span>s...
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN: LEADERBOARD
+       ═══════════════════════════════════════════ -->
+  <div class="screen" id="screen-leaderboard">
+
+    <h2 class="lb-title">🏆 FINAL SCORES</h2>
+
+    <div class="lb-list" id="lb-list">
+      <!-- Entries injected by ui.js -->
+    </div>
+
+    <div class="lb-buttons">
+      <button class="big-btn btn-host hidden" id="btn-play-again">🔄 PLAY AGAIN</button>
+      <button class="big-btn btn-secondary" id="btn-lb-home">🏠 HOME</button>
+    </div>
+
+  </div>
+
+</div><!-- #app -->
+
+<!-- Toast container (portal, outside #app flow) -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Main app script (ES module) -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
